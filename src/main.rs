@@ -3,5 +3,10 @@ use lib::*;
 
 fn main() {
     println!("Creating keys!");
-    let _sk = new_key();
+
+    // Input: ( Dimmension, Noise level )
+    // Output: ( Secret key )
+    let sk = new_key(1024, -40);
+
+    println!("{:?}", sk);
 }

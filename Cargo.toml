@@ -2,8 +2,13 @@
 name = "HEIDA"
 version = "0.1.0"
 edition = "2021"
+authors = ["Henrik Forsgren <henrik.forsgren@ri.se>", "Rickard Brännvall <rickard.brannvall@ri.se>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "lib"
+path = "src/lib.rs"
 
 [dependencies]
 concrete = { version = "=0.1.9"}

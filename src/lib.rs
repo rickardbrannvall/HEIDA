@@ -1,8 +1,13 @@
 use concrete::*;
+use concrete::lwe_secret_key::LWESecretKey;
 
-// #### ---- CREATE NEW SECRET KEY ---- ####
-// Input: ( Dimmension, Noise level )
-// Output: ( Secret key )
+use std::any::type_name;
+
+/*
+#### ---- CREATE NEW SECRET KEY ---- ####
+Input: ( Dimension, Noise level )
+Output: ( Secret key )
+*/
 pub fn new_key(dimension: usize, noise_level: i32) -> LWESecretKey {
 
     let lwe_params: LWEParams = LWEParams::new(dimension, noise_level);
@@ -11,32 +16,98 @@ pub fn new_key(dimension: usize, noise_level: i32) -> LWESecretKey {
     return key
 }
 
-// #### ---- CREATE NEW (PROGRAMABLE) BOOTSTRAPPING KEY ---- ####
-// Input: ( IN KEY, (Optional) OUT KEY )
-// Output: ( Secret key )
-pub fn new_PBS_key(in_key: LWESecretKey, out_key: Option<LWESecretKey>) -> LWEBSK {
+/*
+#### ---- CREATE NEW (PROGRAMABLE) BOOTSTRAPPING KEY ---- ####
+Input: ( IN KEY, (Optional) OUT KEY )
+Output: ( Bootstrap key )
+*/
+pub fn new_PBS_key(in_key: &LWESecretKey, out_key: Option<&LWESecretKey>) -> LWEBSK {
 
-    let match: Vec<String> =
+    let PBS_key = match out_key {
+        Some(k) => create_PBS_two_key(in_key, k),
+        None => create_PBS_one_key(in_key),
+    };
 
-    let lwe_params: LWEParams = LWEParams::new(dimension, noise_level);
-    let key = LWESecretKey::new(&lwe_params);
-
-    return PBS_key
+    return PBS_key;
 }
 
-// let lwe_dim = 1024;//512, 1024, 2048];
-// let lwe_noise = -40;//-19, -40, -62];
+/*
+#### ---- CREATE BOOTSTRAPPING KEY, In key =/= Out key ---- ####
+Input: ( IN KEY, OUT KEY )
+Output: ( Bootstrap key )
+*/
+fn create_PBS_two_key(in_key: &LWESecretKey, out_key: &LWESecretKey) -> LWEBSK{
+    
+    let rlwe_key = out_key.to_rlwe_secret_key(out_key.dimension).unwrap(); 
 
-// let rlwe_dim = 1024; //512, 1024, 2048];
-// let rlwe_noise = -40; //-19, -40, -62];
+    let PBS_key = LWEBSK::new(in_key, &rlwe_key, 6, 6);
 
-// let base_log = 6;
-// let lvl = 6;
+    return PBS_key;
+}
 
-// //let lwe_params: LWEParams = LWEParams::new(lwe_dim, lwe_noise);
-// let rlwe_params: RLWEParams = RLWEParams{polynomial_size: rlwe_dim, dimension: 1, log2_std_dev: rlwe_noise};
 
-// let sk_rlwe = RLWESecretKey::new(&rlwe_params);
-// let sk = sk_rlwe.to_lwe_secret_key();
-// let bsk = LWEBSK::new(&sk, &sk_rlwe, base_log, lvl);
-// //let ksk = LWEKSK::new(&sk, &sk_rlwe, base_log, lvl);
+/*
+#### ---- CREATE BOOTSTRAPPING KEY, In key = Out key ---- ####
+Input: ( IN KEY )
+Output: ( Bootstrap key )
+*/
+fn create_PBS_one_key(in_key: &LWESecretKey) -> LWEBSK{
+
+    let rlwe_key = in_key.to_rlwe_secret_key(in_key.dimension).unwrap(); 
+
+    let PBS_key = LWEBSK::new(in_key, &rlwe_key, 6, 6);
+
+    return PBS_key;
+}
+
+/*
+#### ---- CREATE NEW KEYSWITCHING KEY ---- ####
+Input: ( IN KEY, (Optional) OUT KEY )
+Output: ( Keyswitching key )
+*/
+pub fn new_KS_key(in_key: &LWESecretKey, out_key: &LWESecretKey) -> LWEKSK {
+
+    let KS_key = LWEKSK::new(in_key, out_key, 6, 6);
+
+    return KS_key;
+}
+
+pub trait Save {
+    fn type_of(&self) -> &'static str;
+}
+pub fn save_key(key: &LWESecretKey, id: &str) -> (){
+// pub fn save_key<T>(a: &T, id: &str) -> (){
+    key.save(&format!("{}{}{}", "keys/", "LWE", id));
+
+}
+
+// format!("{}{}{}","keys/", "LWE", id);
+
+pub fn load_key(id: &str) -> LWESecretKey {
+    let key = LWESecretKey::load(&format!("{}{}{}", "keys/", "LWE", id)).unwrap();
+
+    return key;
+}
+
+/*
+Works to print names of objects
+SHOULD NOT BE USED OUTSIDE OF DEBUGGING
+*/
+pub fn print_type_of<T>(_: &T) {
+    println!("{}", std::any::type_name::<T>())
+}
+
+/*
+Trait that gives you the name of structures, IF you already are expecting them
+ */
+pub trait TypeInfo {
+    fn type_of(&self) -> &'static str;
+}
+
+impl TypeInfo for LWESecretKey {
+    fn type_of(&self) -> &'static str {
+        "LWESecretKey"
+    }
+}
+
+

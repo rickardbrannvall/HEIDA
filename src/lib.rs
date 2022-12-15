@@ -1,5 +1,5 @@
 use concrete::*;
-use concrete::lwe_secret_key::LWESecretKey;
+// use concrete::lwe_secret_key::LWESecretKey;
 
 use std::any::type_name;
 
@@ -73,12 +73,22 @@ pub fn new_KS_key(in_key: &LWESecretKey, out_key: &LWESecretKey) -> LWEKSK {
 }
 
 pub trait Save {
-    fn type_of(&self) -> &'static str;
+    fn save_key(&self, id: &str) -> ();
 }
-pub fn save_key(key: &LWESecretKey, id: &str) -> (){
-// pub fn save_key<T>(a: &T, id: &str) -> (){
-    key.save(&format!("{}{}{}", "keys/", "LWE", id));
-
+impl Save for LWESecretKey{
+    fn save_key(&self, id: &str) -> (){
+        self.save(&format!("{}{}{}", "keys/", "LWE", id));
+    }
+}
+impl Save for LWEBSK{
+    fn save_key(&self, id: &str) -> (){
+        self.save(&format!("{}{}{}", "keys/", "BSK", id));
+    }
+}
+impl Save for LWEKSK{
+    fn save_key(&self, id: &str) -> (){
+        self.save(&format!("{}{}{}", "keys/", "KSK", id));
+    }
 }
 
 // format!("{}{}{}","keys/", "LWE", id);

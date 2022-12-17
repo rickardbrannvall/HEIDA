@@ -11,9 +11,10 @@ name = "lib"
 path = "src/lib.rs"
 
 [dependencies]
-concrete = { version = "=0.1.9"}
+concrete = { version = "0.1.9"}
+itertools="0.9.0"
 
 [profile.release]
 opt-level = 3
 lto = "fat"
-codegen-units = 1
+codegen-units = 16

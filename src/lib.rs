@@ -224,13 +224,3 @@ pub fn step_function(x: f64, a: f64, n: i32) -> f64{
         }
     }
 }
-
-// pub fn reverse_step_function(x: f64, a: f64) -> f64{
-//     if x < a {
-//         1.0
-//     }
-//     else {
-//         0.0
-//     }
-// }
-

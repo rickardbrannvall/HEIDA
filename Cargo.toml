@@ -10,9 +10,18 @@ authors = ["Henrik Forsgren <henrik.forsgren@ri.se>", "Rickard Brännvall <ricka
 name = "lib"
 path = "src/lib.rs"
 
+[[bin]]
+name = "cardio"
+path = "src/bin/cardio.rs"
+
+[[bin]]
+name = "create_keys"
+path = "src/bin/create_keys.rs"
+
 [dependencies]
-concrete = { version = "0.1.9"}
+concrete = { version = "=0.1.9"}
 itertools="0.9.0"
+rayon="^1.1"
 
 [profile.release]
 opt-level = 3

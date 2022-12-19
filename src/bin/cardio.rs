@@ -33,30 +33,7 @@ fn encrypt_cardio_data(small: &Vec<f64>, large: &Vec<f64>, sk: &LWESecretKey) ->
     return (small_enc, large_enc, enc_small, enc_large);
 }
 
-fn main() {
-    
-    let id = "00001";
-
-    println!("Loading Secret key!");
-    let sk = load_sk(id);
-
-    let (small, large) = get_dummy_data();
-    let (small_enc, large_enc, enc_small, enc_large) = encrypt_cardio_data(&small, &large, &sk);
-
-    let (small_enc_new, large_enc_new) = (small_enc.clone(), large_enc.clone());  
-    
-    println!("Loading Bootstrapping key!");
-    let bsk = load_bsk(id);
-    // println!("{:?}", bsk.polynomial_size);
-
-    println!("Loading Keyswitching key!");
-    let ksk = load_ksk(id);
-    // println!("{:?}", ksk.dimension_after);
-
-    /* 
-        Older version
-    */
-    let now = Instant::now();
+fn old_cardio(small_enc: &VectorLWE, large_enc: &VectorLWE, enc_small: &Encoder, sk: &LWESecretKey, bsk: &LWEBSK, ksk: &LWEKSK) -> (){
 
     let mut y0 = VectorLWE::zero(1024, 8).unwrap();
     y0.copy_in_nth_nth_inplace(0, &small_enc, 0).unwrap(); // dummy
@@ -200,14 +177,9 @@ fn main() {
     
     println!("score {:?}", score0.decrypt_decode(&sk).unwrap());
     // score0.pp();
+}
 
-    println!("{}", (now.elapsed().as_millis() as f32)/1000.0);
-
-
-    /* 
-        Updated version (?)
-    */
-    let now = Instant::now();
+fn new_cardio(small_enc_new: &VectorLWE, large_enc_new: &VectorLWE, enc_small: &Encoder, sk: &LWESecretKey, bsk: &LWEBSK) -> (){
 
     // ## ---- Pre-proceessing before Bootstrapping ---- ## 
 
@@ -224,7 +196,7 @@ fn main() {
     mod0.mul_constant_static_encoder_inplace(&vec![10]).unwrap();
     age.add_with_new_min_inplace(&mod0, &vec![0.0]).unwrap();
     
-    boot_list.push(age0);
+    boot_list.push(age);
     func_list.push((step_function, 60.0, 1));
 
     // ## -- HDL chol -- ##
@@ -272,9 +244,52 @@ fn main() {
 
     let score = scores.sum_with_new_min(0.).unwrap();
     println!("score {:?}", score.decrypt_decode(&sk).unwrap());
-    println!("{}", (now.elapsed().as_millis() as f32)/1000.0);
 
     // y = [Boot (large_enc_new[0]-large_enc_new[5]), small_enc_new[1], small_enc_new[2], small_enc_new[3], Boot large_enc_new[1], Boot (large_enc_new[2]-large_enc_new[3]), Boot large_enc_new[4], Boot (small_enc_new[4]-small_enc_new[0])]
     // OR y = [Boot (large_enc_new[0]-large_enc_new[5]), Boot large_enc_new[1], Boot (large_enc_new[2]-large_enc_new[3]), Boot large_enc_new[4], Boot (small_enc_new[4]-small_enc_new[0]), small_enc_new[1], small_enc_new[2], small_enc_new[3]]
     // y_s = y.sum();
+
+}
+
+fn main() {
+    
+    let id = "00001";
+
+    println!("Loading Secret key!");
+    let sk = load_sk(id);
+
+    let (small, large) = get_dummy_data();
+    let (small_enc, large_enc, enc_small, enc_large) = encrypt_cardio_data(&small, &large, &sk);
+
+    let (small_enc_new, large_enc_new) = (small_enc.clone(), large_enc.clone());  
+    
+    println!("Loading Bootstrapping key!");
+    let bsk = load_bsk(id);
+    // println!("{:?}", bsk.polynomial_size);
+
+    println!("Loading Keyswitching key!");
+    let ksk = load_ksk(id);
+    // println!("{:?}", ksk.dimension_after);
+
+    /* 
+        Older version
+    */
+    let now = Instant::now();
+
+    // for _ in 0..10{
+        old_cardio(&small_enc, &large_enc, &enc_small, &sk, &bsk, &ksk);
+    // }
+    println!("{}", (now.elapsed().as_millis() as f32)/1000.0);
+
+
+    /* 
+        Updated version ~4x faster
+    */
+    let now = Instant::now();
+    // for _ in 0..10{
+    new_cardio(&small_enc_new, &large_enc_new, &enc_small, &sk, &bsk);
+    // }
+    println!("{}", (now.elapsed().as_millis() as f32)/1000.0);
+
+
 }

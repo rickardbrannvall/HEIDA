@@ -1,6 +1,6 @@
 use concrete::*;
 // use concrete::lwe_secret_key::LWESecretKey;
-
+// use rayon::prelude::*;
 // use std::any::type_name;
 
 
@@ -194,8 +194,17 @@ pub fn ListVecLWE_to_VecLWE(ct: Vec<VectorLWE>) -> VectorLWE{
 
 // pub fn remove_padding()
 
-
-
+pub trait Sum {
+    fn sum(&self) -> ();
+}
+impl Sum for Vec<LWE>{
+    fn sum(&self) -> (){
+    }
+}
+impl Sum for Vec<VectorLWE>{
+    fn sum(&self) -> (){
+    }
+}
 
 
 
@@ -214,8 +223,7 @@ pub fn step_function(x: f64, a: f64, n: i32) -> f64{
         else {
             return 0.0;
         }
-    }
-    else{
+    } else{
         if x < a {
             return 1.0;
         }

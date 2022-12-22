@@ -1,7 +1,16 @@
 // use concrete::*;
 use lib::*;
 
+fn divides(lenght: i32) -> i32{
+    let mut x: i32 = 2;
+    while x > 2{
+        
+    }
+}
+
 fn main() {
+
+    println!("{}", divides(8));
 
     let id = "00001";
 

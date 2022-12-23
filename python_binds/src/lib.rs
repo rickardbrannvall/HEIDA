@@ -36,8 +36,8 @@ fn load_sk(id: &str) -> LWESecretKey {
 }
 
 #[pyfunction]
-fn create_sk(id: String) -> PyResult<()> {
-    let lwe_params: LWEParams = LWEParams::new(1024, -40);
+fn create_sk(dim: usize, noise: i32, id: String) -> PyResult<()> {
+    let lwe_params: LWEParams = LWEParams::new(dim, noise);
     let sk = LWESecretKey::new(&lwe_params);
 
     sk.save_key(&id);    
@@ -58,24 +58,83 @@ fn get_LWE_str(x: f64, id: String) -> PyResult<String> {
 }
 
 #[pyfunction]
-fn add_LWE_str(str_x: String, str_y: String, id: String) -> PyResult<f64> {
+fn add_LWE_str(str_x: String, str_y: String, id: String) -> PyResult<String> {
 
     let sk = load_sk(&id);
 
     let x: LWE = serde_json::from_str(&str_x).unwrap();
     let y: LWE = serde_json::from_str(&str_y).unwrap();
 
-    let z = (x.add_with_padding(&y).unwrap()).decrypt_decode(&sk).unwrap();
+    // let z = (x.add_with_padding(&y).unwrap()).decrypt_decode(&sk).unwrap();
+    let z = x.add_with_padding(&y).unwrap();
+    let str_z = serde_json::to_string(&z).unwrap();
 
-    Ok(z)
+    Ok(str_z)
+}
+
+#[pyfunction]
+fn decrypt_LWE_str(str_x: String, id: String) -> PyResult<f64> {
+    
+    let sk = load_sk(&id);
+
+    let x: LWE = serde_json::from_str(&str_x).unwrap();
+    
+    let res = x.decrypt_decode(&sk).unwrap();
+
+    Ok(res)
+}
+
+#[pyfunction]
+fn get_VecLWE_str(x: Vec<f64>, id: String) -> PyResult<String> {
+
+    let sk = load_sk(&id);
+    let encoder = Encoder::new(0., 10., 4, 1).unwrap();
+
+    let lwe = VectorLWE::encode_encrypt(&sk, &x, &encoder).unwrap();
+    let lwe_string = serde_json::to_string(&lwe).unwrap();
+
+    Ok(lwe_string)
+}
+
+#[pyfunction]
+fn add_VecLWE_str(str_x: String, str_y: String, id: String) -> PyResult<String> {
+
+    let sk = load_sk(&id);
+
+    let x: VectorLWE = serde_json::from_str(&str_x).unwrap();
+    let y: VectorLWE = serde_json::from_str(&str_y).unwrap();
+
+    // let z = (x.add_with_padding(&y).unwrap()).decrypt_decode(&sk).unwrap();
+    let z = x.add_with_padding(&y).unwrap();
+    let str_z = serde_json::to_string(&z).unwrap();
+
+    Ok(str_z)
+}
+
+#[pyfunction]
+fn decrypt_VecLWE_str(str_x: String, id: String) -> PyResult<Vec<f64>> {
+    
+    let sk = load_sk(&id);
+
+    let x: VectorLWE = serde_json::from_str(&str_x).unwrap();
+    
+    let res = x.decrypt_decode(&sk).unwrap();
+
+    Ok(res)
 }
 
 #[pymodule]
-fn encrypt_val(_py: Python, m: &PyModule) -> PyResult<()> {
+fn libheida(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(calculate, m)?)?;
     m.add_function(wrap_pyfunction!(add, m)?)?;
     m.add_function(wrap_pyfunction!(create_sk, m)?)?;
+
     m.add_function(wrap_pyfunction!(get_LWE_str, m)?)?;
     m.add_function(wrap_pyfunction!(add_LWE_str, m)?)?;
+    m.add_function(wrap_pyfunction!(decrypt_LWE_str, m)?)?;
+
+    m.add_function(wrap_pyfunction!(get_VecLWE_str, m)?)?;
+    m.add_function(wrap_pyfunction!(add_VecLWE_str, m)?)?;
+    m.add_function(wrap_pyfunction!(decrypt_VecLWE_str, m)?)?;
     Ok(())
 }

@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-name = "encrypt_val"
+name = "heida"
 crate-type = ["cdylib"]
 
 [dependencies]
@@ -18,3 +18,8 @@ serde_json = "1.0.57"
 [dependencies.pyo3]
 version = "0.14.4"
 features = ["extension-module"]
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1

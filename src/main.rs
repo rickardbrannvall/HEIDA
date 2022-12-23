@@ -1,16 +1,18 @@
 // use concrete::*;
 use lib::*;
 
-fn divides(lenght: i32) -> i32{
-    let mut x: i32 = 2;
+fn divides(lenght: i32) -> f64{
+    let N = lenght;
+    let n = (lenght as f64).log2().floor();
     while x > 2{
-        
+
     }
+    return n;
 }
 
 fn main() {
 
-    println!("{}", divides(8));
+    println!("{}", divides(12));
 
     let id = "00001";
 

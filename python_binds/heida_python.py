@@ -6,18 +6,19 @@ from target.release.libheida import (create_sk,
     get_list_VecLWE_str)
 
 
-
+print("\nCreating Secret key!")
 for _ in range(10):
-    _ = create_sk(256, -12, "00001")
+    _ = create_sk(512, -12, "00001")
 
 start = time()
-_ = create_sk(256, -12, "00001")
+_ = create_sk(512, -12, "00001")
 end = time()
 
 print(f"elapsed: {end-start}")
 
 
 
+print("\nEncrypt and move to string!")
 for _ in range(10):
     x_LWE = get_LWE_str(0.0, "00001")
 
@@ -30,6 +31,7 @@ print(f"size of(in kB): {len(x_LWE.encode('utf-8'))/1000}")
 
 
 
+print("\nStrin to encrypted value and then decrypt")
 for _ in range(10):
     _ = decrypt_LWE_str(x_LWE, "00001")
 
@@ -37,10 +39,11 @@ start = time()
 _ = decrypt_LWE_str(x_LWE, "00001")
 end = time()
 
-print(f"Decrypting  elapsed: {end-start}")
+print(f"Decrypting elapsed: {end-start}")
 
 
 
+print("\n2x strings to encryted values and then add")
 y_LWE = get_LWE_str(1.0, "00001")
 for _ in range(10):
     _ = add_LWE_str(x_LWE, y_LWE, "00001")
@@ -55,8 +58,9 @@ print(f"1 + 1 = {z}, calculated in elapsed: {end-start}")
 
 
 ## ---- VECTORS ---- ##
-my_list = [1.0 for _ in range(1000)]
+my_list = [1.0 for _ in range(10_000)]
 
+print("\nEncrypt and move to string!")
 for _ in range(10):
     x_VecLWE = get_VecLWE_str(my_list, "00001")
 

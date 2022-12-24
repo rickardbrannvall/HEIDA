@@ -1,4 +1,5 @@
 use pyo3::prelude::*;
+use rayon::prelude::*;
 use concrete::*;
 use serde::*;
 
@@ -123,6 +124,26 @@ fn decrypt_VecLWE_str(str_x: String, id: String) -> PyResult<Vec<f64>> {
     Ok(res)
 }
 
+#[pyfunction]
+fn get_list_VecLWE_str(x: Vec<f64>, id: String) -> PyResult<()> {
+
+    let sk = load_sk(&id);
+    // let encoder = Encoder::new(0., 10., 4, 1).unwrap();
+
+    // let lwe = VectorLWE::encode_encrypt(&sk, &x, &encoder).unwrap();
+    // let lwe_string = serde_json::to_string(&lwe).unwrap();
+
+    // let list_lwe: Vec<VectorLWE> = vec![VectorLWE::zero(1, 1).unwrap(); x.len()];
+
+    let mut list_lwe: Vec<VectorLWE> = vec![VectorLWE::zero(1, 1).unwrap()];
+    list_lwe.par_iter_mut().zip(x.par_iter()).for_each(| (lst, val) |{
+        *lst = lst.push(VectorLWE::zero(1, 1).unwrap());
+        let y = val;
+    });
+
+    Ok(())
+}
+
 #[pymodule]
 fn libheida(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(calculate, m)?)?;
@@ -136,5 +157,7 @@ fn libheida(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_VecLWE_str, m)?)?;
     m.add_function(wrap_pyfunction!(add_VecLWE_str, m)?)?;
     m.add_function(wrap_pyfunction!(decrypt_VecLWE_str, m)?)?;
+
+    m.add_function(wrap_pyfunction!(get_list_VecLWE_str, m)?)?;
     Ok(())
 }

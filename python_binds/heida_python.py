@@ -8,10 +8,10 @@ from target.release.libheida import (create_sk,
 
 print("\nCreating Secret key!")
 for _ in range(10):
-    _ = create_sk(512, -12, "00001")
+    _ = create_sk(512, -19, "00001")
 
 start = time()
-_ = create_sk(512, -12, "00001")
+_ = create_sk(512, -19, "00001")
 end = time()
 
 print(f"elapsed: {end-start}")
@@ -31,7 +31,7 @@ print(f"size of(in kB): {len(x_LWE.encode('utf-8'))/1000}")
 
 
 
-print("\nStrin to encrypted value and then decrypt")
+print("\nString to encrypted value and then decrypt")
 for _ in range(10):
     _ = decrypt_LWE_str(x_LWE, "00001")
 
@@ -58,7 +58,7 @@ print(f"1 + 1 = {z}, calculated in elapsed: {end-start}")
 
 
 ## ---- VECTORS ---- ##
-my_list = [1.0 for _ in range(10_000)]
+my_list = [1.0 for _ in range(14_000)]
 
 print("\nEncrypt and move to string!")
 for _ in range(10):
@@ -73,6 +73,7 @@ print(f"size of(in kB): {len(x_VecLWE.encode('utf-8'))/1000}")
 
 
 
+print("\nString to encrypted value and then decrypt")
 for _ in range(10):
     _ = decrypt_VecLWE_str(x_VecLWE, "00001")
 
@@ -83,6 +84,7 @@ end = time()
 print(f"Decrypting elapsed: {end-start}")
 
 
+print("\n2x strings to encryted values and then add")
 y_VecLWE = get_VecLWE_str(my_list, "00001")
 for _ in range(10):
     z_VecLWE = add_VecLWE_str(x_VecLWE, y_VecLWE, "00001")
@@ -97,8 +99,9 @@ print(f"z = {np.mean(z)} +- {np.std(z)}, calculated in elapsed: {end-start}")
 
 
 ## ---- LISTS ---- ##
-my_list = [1.0 for _ in range(10_000)]
+# my_list = [1.0 for _ in range(100_000)]
 
+print("\nEncrypt and move to string!")
 for _ in range(10):
     x_VecLWE = get_list_VecLWE_str(my_list, "00001")
 

@@ -124,8 +124,13 @@ fn decrypt_VecLWE_str(str_x: String, id: String) -> PyResult<Vec<f64>> {
     Ok(res)
 }
 
+#[derive(Serialize, Deserialize)]
+struct LWE_list{
+    pub lwe_list: Vec<VectorLWE>,
+}
+
 #[pyfunction]
-fn get_list_VecLWE_str(x: Vec<f64>, id: String) -> PyResult<()> {
+fn get_list_VecLWE_str(x: Vec<f64>, id: String) -> PyResult<(String)> {
 
     let sk = load_sk(&id);
     let encoder = Encoder::new(0., 10., 4, 1).unwrap();
@@ -139,8 +144,11 @@ fn get_list_VecLWE_str(x: Vec<f64>, id: String) -> PyResult<()> {
         *item = VectorLWE::encode_encrypt(&sk, &[*val], &encoder).unwrap();
     });
 
-    Ok(())
+    let list_lwe_string = serde_json::to_string(&list_lwe).unwrap();
+
+    Ok(list_lwe_string)
 }
+
 
 #[pymodule]
 fn libheida(_py: Python, m: &PyModule) -> PyResult<()> {

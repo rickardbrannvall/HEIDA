@@ -8,10 +8,10 @@ from target.release.libheida import (create_sk,
 
 print("\nCreating Secret key!")
 for _ in range(10):
-    _ = create_sk(512, -19, "00001")
+    _ = create_sk(1024, -40, "00001")
 
 start = time()
-_ = create_sk(512, -19, "00001")
+_ = create_sk(1024, -40, "00001")
 end = time()
 
 print(f"elapsed: {end-start}")

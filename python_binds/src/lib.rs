@@ -50,7 +50,7 @@ fn create_sk(dim: usize, noise: i32, id: String) -> PyResult<()> {
 fn get_LWE_str(x: f64, id: String) -> PyResult<String> {
 
     let sk = load_sk(&id);
-    let encoder = Encoder::new(0., 10., 4, 2).unwrap();
+    let encoder = Encoder::new(-5., 5., 4, 2).unwrap();
 
     let lwe = LWE::encode_encrypt(&sk, x, &encoder).unwrap();
     let lwe_string = serde_json::to_string(&lwe).unwrap();
@@ -89,7 +89,7 @@ fn decrypt_LWE_str(str_x: String, id: String) -> PyResult<f64> {
 fn get_VecLWE_str(x: Vec<f64>, id: String) -> PyResult<String> {
 
     let sk = load_sk(&id);
-    let encoder = Encoder::new(0., 10., 4, 2).unwrap();
+    let encoder = Encoder::new(-5., 5., 4, 2).unwrap();
 
     let lwe = VectorLWE::encode_encrypt(&sk, &x, &encoder).unwrap();
     let lwe_string = serde_json::to_string(&lwe).unwrap();
@@ -133,7 +133,7 @@ struct LWE_list{
 fn get_list_VecLWE_str(x: Vec<f64>, id: String) -> PyResult<(String)> {
 
     let sk = load_sk(&id);
-    let encoder = Encoder::new(0., 10., 4, 2).unwrap();
+    let encoder = Encoder::new(-5., 5., 4, 2).unwrap();
 
     // let lwe = VectorLWE::encode_encrypt(&sk, &x, &encoder).unwrap();
     // let lwe_string = serde_json::to_string(&lwe).unwrap();

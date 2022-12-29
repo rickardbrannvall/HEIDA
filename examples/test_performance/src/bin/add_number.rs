@@ -15,9 +15,13 @@ fn main() -> Result<(), CryptoAPIError> {
     // def_80_1024_1 => 38
     // std_62_2048_1 => 60
     
-    // $ add_vector sk_path prec padd lower upper n_vectors m_entries X11 X12 .... Xnm
-    // target/release/add_vectors keys/def_80_512_1 6 4 0.0 1.0 2 2 0.5 0.3 0.7 0.4
-    // output: key_load enc_time add_time dec_time Y1 ... Ym 
+    // input: sk_path prec padd lower upper value times
+    // 
+    // example:
+    // target/release/add_number keys/def_80_512_1 6 4 -1.0 1.0 0.0 2
+    // 
+    // output: sk0_path, prec, padd, lower, upper, value, 
+    // times, load_time, enc_time, add_time, dec_time, answer
     
     // println!("# Add n=2**k vectors of length m");
     
@@ -31,18 +35,16 @@ fn main() -> Result<(), CryptoAPIError> {
     let padd: usize = args[3].parse().unwrap(); // 4; 
     let lower: f64 = args[4].parse().unwrap(); // 0.0;
     let upper: f64 = args[5].parse().unwrap(); // 2.0;
-    let n_vectors: usize = args[6].parse().unwrap(); // 8;
-    // if n is not power of 2 then fail
-    let m_entries: usize = args[7].parse().unwrap(); // 4; 
-    //if (args.len()-8) != m*n then fail
+    let value: f64 = args[6].parse().unwrap(); // 2.0;
+    let times: usize = args[7].parse().unwrap(); // 8;
 
     //println!("# sk_path: {}", sk_path);
     //println!("# prec: {}", prec);
     //println!("# padd: {}", padd);
     //println!("# lower: {}", lower);
     //println!("# upper: {}", upper);
-    //println!("# n_vectors: {}", n_vectors);
-    //println!("# m_entries: {}", m_entries);
+    //println!("# value: {}", value);
+    //println!("# times: {}", times);
     
     let sk0_LWE_path = format!("{}/sk0_LWE.json",sk_path);
     //println!("# Loading LWE key {} ...",sk0_LWE_path);
@@ -55,21 +57,14 @@ fn main() -> Result<(), CryptoAPIError> {
     //println!("# create an encoder... \n");
     let enc = Encoder::new(lower, upper, prec, padd)?;
 
-    let mut w = vec![];
     let mut w_enc = vec![];
     let mut enc_time: u128 = 0; 
-    for i in 0..n_vectors {
+    for i in 0..times {
         let mut v = vec![];
-        for j in 0..m_entries {
-            let x: f64 = args[8+i*m_entries+j].parse().unwrap();
-            //println!("x: {}",x);
-            v.push(x);
-        }        
-        //println!("v: {:?}",v);
+        v.push(value);
         let now = Instant::now();
         let v_enc = VectorLWE::encode_encrypt(&sk0, &v, &enc)?;
         enc_time = now.elapsed().as_micros(); //.as_millis(); 
-        w.push(v);
         w_enc.push(v_enc);
     }
     //println!("len(w): {}",w.len());
@@ -99,7 +94,10 @@ fn main() -> Result<(), CryptoAPIError> {
     
     //println!("add: {:?}",a);
 
-    println!("{} {} {} {} {:?}", load_time, enc_time, add_time, dec_time, a);
+    //println!("{} {} {} {} {}", load_time, enc_time, add_time, dec_time, a[0]);
+
+    println!("{} {} {} {} {} {} {} {} {} {} {} {}", sk0_LWE_path, prec, padd, 
+        lower, upper, value, times, load_time, enc_time, add_time, dec_time, a[0]);
     
     Ok(())
 }

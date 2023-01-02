@@ -18427,3 +18427,33 @@ keys/std_62_2048_1/sk0_LWE.json 1 7 -1 1 0 4 6 152889068 98 774816 5190 N/A
 keys/std_62_2048_1/sk0_LWE.json 1 7 -1 1 0 4 7 176435568 98 895600 5336 N/A
 [1;31mLoss of precision during bootstrap due to the rounding[0m: 2 bit(s) of precision lost over 1 bit(s) of message originally (6 bits are affected by the noise). Consider increasing the polynomial size of the RLWE secret key.
 keys/std_62_2048_1/sk0_LWE.json 1 7 -1 1 0 4 8 203029114 132 1038157 12153 N/A
+[1;31mLoss of precision during bootstrap due to the rounding[0m: 2 bit(s) of precision lost over 1 bit(s) of message originally (6 bits are affected by the noise). Consider increasing the polynomial size of the RLWE secret key.
+keys/std_62_2048_1/sk0_LWE.json 1 7 -1 1 0 4 9 224008451 104 1271278 13659 N/A
+[1;31mLoss of precision during bootstrap[0m: 4 bit(s) of precision lost over 1 bit(s) of message originally. Consider increasing the number of level and/or decreasing the log base.
+[1;31mLoss of precision during bootstrap due to the rounding[0m: 1 bit(s) of precision lost over 1 bit(s) of message originally (6 bits are affected by the noise). Consider increasing the polynomial size of the RLWE secret key.
+keys/std_62_2048_1/sk0_LWE.json 1 7 -1 1 0 5 3 73503999 95 481917 5166 N/A
+[1;31mLoss of precision during bootstrap due to the rounding[0m: 2 bit(s) of precision lost over 1 bit(s) of message originally (6 bits are affected by the noise). Consider increasing the polynomial size of the RLWE secret key.
+keys/std_62_2048_1/sk0_LWE.json 1 7 -1 1 0 5 4 99015220 90 562093 5229 N/A
+[1;31mLoss of precision during bootstrap due to the rounding[0m: 2 bit(s) of precision lost over 1 bit(s) of message originally (6 bits are affected by the noise). Consider increasing the polynomial size of the RLWE secret key.
+keys/std_62_2048_1/sk0_LWE.json 1 7 -1 1 0 5 5 127772756 118 647845 5059 N/A
+[1;31mLoss of precision during bootstrap due to the rounding[0m: 2 bit(s) of precision lost over 1 bit(s) of message originally (6 bits are affected by the noise). Consider increasing the polynomial size of the RLWE secret key.
+keys/std_62_2048_1/sk0_LWE.json 1 7 -1 1 0 5 6 150317196 121 823746 5326 N/A
+[1;31mLoss of precision during bootstrap due to the rounding[0m: 2 bit(s) of precision lost over 1 bit(s) of message originally (6 bits are affected by the noise). Consider increasing the polynomial size of the RLWE secret key.
+keys/std_62_2048_1/sk0_LWE.json 1 7 -1 1 0 5 7 175906764 113 889198 5456 N/A
+[1;31mLoss of precision during bootstrap due to the rounding[0m: 2 bit(s) of precision lost over 1 bit(s) of message originally (6 bits are affected by the noise). Consider increasing the polynomial size of the RLWE secret key.
+keys/std_62_2048_1/sk0_LWE.json 1 7 -1 1 0 5 8 199323755 102 1000897 5464 N/A
+[1;31mLoss of precision during bootstrap due to the rounding[0m: 2 bit(s) of precision lost over 1 bit(s) of message originally (6 bits are affected by the noise). Consider increasing the polynomial size of the RLWE secret key.
+keys/std_62_2048_1/sk0_LWE.json 1 7 -1 1 0 5 9 228426470 112 1157432 5431 N/A
+[1;31mLoss of precision during bootstrap[0m: 1 bit(s) of precision lost over 1 bit(s) of message originally. Consider increasing the number of level and/or decreasing the log base.
+[1;31mLoss of precision during bootstrap due to the rounding[0m: 1 bit(s) of precision lost over 1 bit(s) of message originally (6 bits are affected by the noise). Consider increasing the polynomial size of the RLWE secret key.
+keys/std_62_2048_1/sk0_LWE.json 1 7 -1 1 0 6 3 74106360 126 524689 5430 N/A
+[1;31mLoss of precision during bootstrap due to the rounding[0m: 2 bit(s) of precision lost over 1 bit(s) of message originally (6 bits are affected by the noise). Consider increasing the polynomial size of the RLWE secret key.
+keys/std_62_2048_1/sk0_LWE.json 1 7 -1 1 0 6 4 100543120 99 629934 5815 N/A
+[1;31mLoss of precision during bootstrap due to the rounding[0m: 2 bit(s) of precision lost over 1 bit(s) of message originally (6 bits are affected by the noise). Consider increasing the polynomial size of the RLWE secret key.
+keys/std_62_2048_1/sk0_LWE.json 1 7 -1 1 0 6 5 125711955 93 730421 5410 N/A
+[1;31mLoss of precision during bootstrap due to the rounding[0m: 2 bit(s) of precision lost over 1 bit(s) of message originally (6 bits are affected by the noise). Consider increasing the polynomial size of the RLWE secret key.
+keys/std_62_2048_1/sk0_LWE.json 1 7 -1 1 0 6 6 151186163 127 803000 5233 N/A
+[1;31mLoss of precision during bootstrap due to the rounding[0m: 2 bit(s) of precision lost over 1 bit(s) of message originally (6 bits are affected by the noise). Consider increasing the polynomial size of the RLWE secret key.
+keys/std_62_2048_1/sk0_LWE.json 1 7 -1 1 0 6 7 176239781 124 904980 5265 N/A
+[1;31mLoss of precision during bootstrap due to the rounding[0m: 2 bit(s) of precision lost over 1 bit(s) of message originally (6 bits are affected by the noise). Consider increasing the polynomial size of the RLWE secret key.
+keys/std_62_2048_1/sk0_LWE.json 1 7 -1 1 0 6 8 207054314 121 961901 5204 N/A

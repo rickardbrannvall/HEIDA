@@ -1,5 +1,5 @@
 [package]
-name = "ewma_GVI"
+name = "test_performance"
 version = "0.1.0"
 edition = "2018"
 
@@ -7,7 +7,7 @@ edition = "2018"
 
 [dependencies]
 concrete = "0.1.9"
-concrete-npe = "*"
+concrete-npe = "0.1.9"
 concrete-commons = "*"
 ndarray = "*"
 ndarray-csv = "*"

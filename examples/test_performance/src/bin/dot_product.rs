@@ -1,0 +1,150 @@
+#![allow(non_snake_case)]
+#![allow(dead_code)]
+#![allow(unused_imports)]
+#![allow(unused_variables)]
+
+use std::fs;
+use std::env;
+use std::time::{Instant}; // Duration, 
+use std::convert::TryInto;
+
+use concrete::*;
+
+fn main() -> Result<(), CryptoAPIError> {
+
+    // def_80_256_1 => 7
+    // def_80_512_1 => 17
+    // def_80_1024_1 => 38
+    // std_62_2048_1 => 60
+    
+    // Dor product of ciphertext vector by real vector
+    // each of length base2
+    // with padding for multiplication
+    //
+    // input: sk_path prec padd lower upper max_mult base2 c_vec m_vec  
+    // 
+    // example:
+    // target/release/dot_product keys/def_80_512_1 6 4 -1.0 1.0 5.0 4 0.1 0.2 0.3 0.4 1.0 2.0 3.0 4.0
+    // 
+    // output: sk_path prec padd lower upper max_mult exp2 
+    // load_time, enc_time, dot_time, dec_time, answer
+        
+    let args: Vec<String> = env::args().collect();
+    //if args.len() < 1+8 {
+    //    fail 
+    //}
+    
+    let sk_path: String = args[1].parse().unwrap(); // String::from("keys/std_62_2048_1/"); 
+    let prec: usize = args[2].parse().unwrap(); // 6;
+    let padd: usize = args[3].parse().unwrap(); // 4; 
+    let lower: f64 = args[4].parse().unwrap(); // 0.0;
+    let upper: f64 = args[5].parse().unwrap(); // 2.0;
+    let max_mult: f64 = args[6].parse().unwrap(); // 2.0;
+    let exp2: usize = args[7].parse().unwrap(); // 4; 
+    
+    let base2: usize = 2usize.pow(exp2.try_into().unwrap()); 
+    //println!("base2: {}",base2);
+
+    //println!("# sk_path: {}", sk_path);
+    //println!("# prec: {}", prec);
+    //println!("# padd: {}", padd);
+    //println!("# lower: {}", lower);
+    //println!("# upper: {}", upper);
+    //println!("# value: {}", value);
+    //println!("# times: {}", times);
+    
+    let sk0_LWE_path = format!("{}/sk0_LWE.json",sk_path);
+    //println!("# Loading LWE key {} ...",sk0_LWE_path);
+    let now = Instant::now();
+    let sk0 = LWESecretKey::load(&sk0_LWE_path).unwrap();    
+    let load_time = now.elapsed().as_micros(); //.as_millis();
+    //println!("load_lwe_key {} {}", sk0_LWE_path, load_time);
+        
+    // create an encoder
+    //println!("# create an encoder... \n");
+    let enc = Encoder::new(lower, upper, prec, padd+exp2)?;
+    
+    let mut v = vec![];
+    for j in 0..base2 {
+        let x: f64 = args[8+j].parse().unwrap();
+        //println!("x: {}",x);
+        v.push(x);
+    }   
+    //println!("v: {:?}",v);
+
+    let mut m = vec![];
+    for j in 0..base2 {
+        let x: f64 = args[8+base2+j].parse().unwrap();
+        //println!("x: {}",x);
+        m.push(x);
+    }   
+    //println!("m: {:?}",m);
+    
+    let now = Instant::now();
+    let v_enc = VectorLWE::encode_encrypt(&sk0, &v, &enc)?;
+    let enc_time = now.elapsed().as_micros(); //.as_millis();    
+        
+    fn add(enc_w: Vec<VectorLWE>) -> VectorLWE { // f64 { //
+        let n = enc_w.len();
+        if n==1 {
+            //return 1.0;
+            return enc_w[0].clone();
+        }
+        else {
+            //return add(enc_w[0..n/2].to_vec()) + add(enc_w[n/2..n].to_vec());
+            let v1 = add(enc_w[0..n/2].to_vec());
+            let v2 = add(enc_w[n/2..n].to_vec());
+            let rs = v1.add_with_padding(&v2).unwrap();
+            return rs;
+        }
+    }
+
+    /*
+    let constants: Vec<f64> = vec![-2.1, 1.4, 3.2];
+    let max_constant: f64 = 4.;
+    let nb_bit_padding = 4;
+    ciphertext_vector.mul_constant_with_padding_inplace(&constants, max_constant, nb_bit_padding)?;
+    
+    let now = Instant::now();
+    let a_enc = mul(&v_enc, &z_enc, &base2, &mult);
+    let mul_time = now.elapsed().as_micros(); //.as_millis();
+
+    */
+
+    let now = Instant::now();
+    let d_enc = v_enc.mul_constant_with_padding(&m, max_mult, padd).unwrap();
+    let mut d_vec = vec![];
+    for j in 0..base2 {
+        let x_enc = d_enc.extract_nth(j).unwrap();
+        d_vec.push(x_enc);
+    }   
+    //println!("len: {}",d_vec.len());
+    let a_enc = add(d_vec);
+    let mul_time = now.elapsed().as_micros(); //.as_millis();
+ 
+    let now = Instant::now();
+    let a = a_enc.decrypt_decode(&sk0).unwrap();
+    let dec_time = now.elapsed().as_micros(); //as_millis();
+    
+    /*
+    let mut mult_vec = vec![];
+    mult_vec.push(mult);
+    
+    let now = Instant::now();
+    let a_enc = v_enc.mul_constant_with_padding(&mult_vec, max_mult, padd).unwrap();
+    let mul_time = now.elapsed().as_micros(); //.as_millis();
+   
+    let now = Instant::now();
+    let a = a_enc.decrypt_decode(&sk0).unwrap();
+    let dec_time = now.elapsed().as_micros(); //as_millis();
+    */
+    
+    //println!("add: {:?}",a);
+
+    println!("{} {} {} {} {} {} {} {} {} {} {} {}", 
+        sk0_LWE_path, prec, padd, lower, upper, max_mult, exp2, 
+        load_time, enc_time, mul_time, dec_time, a[0]);
+    
+    Ok(())
+}
+

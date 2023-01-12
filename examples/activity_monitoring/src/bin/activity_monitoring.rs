@@ -39,31 +39,32 @@ fn main(){
 
 
     // let mut test_d = test_datas[0].clone();
-    let mut test_d = vec![0.5; 19];
+    // let mut test_d = vec![0.5; 19];
 
-    for i in 0..24-19{
-        test_d.push(-3.);
-    }
-    println!("test_d: {:?}", &test_d);
+    // for i in 0..24-19{
+    //     test_d.push(-3.);
+    // }
+    // println!("test_d: {:?}", &test_d);
 
-    let mut sum = 0.;
-    for d in &test_d{
-        sum += d;
-    }
-    println!("sum: {}\n", sum);
+    // let mut sum = 0.;
+    // for d in &test_d{
+    //     sum += d;
+    // }
+    // println!("sum: {}\n", sum);
 
     
-    let prec = 4;
+    let prec = 5;
     // let enc = Encoder::new(-4.5, 9., prec, prec+2+1).unwrap();
-    let enc = Encoder::new(-3., 9., prec, prec+2+1).unwrap();
+    let enc = Encoder::new(1.*-0.7, 1.1, prec, prec+2+1).unwrap();
 
+    /*
     let test = VectorLWE::encode_encrypt(&sk, &test_d, &enc).unwrap();
 
     let summed = test.sum(&sk);
     // println!("{:?}", summed[0].decrypt_decode(&sk).unwrap());
     println!("{:?}", summed.decrypt_decode(&sk).unwrap());
-
-    
+    */
+    /*    
     let x = vec![10.];
     let y = vec![-80.];
     let r = vec![-70.];
@@ -106,8 +107,8 @@ fn main(){
     println!("new_min: {}", new_min);
     
     println!("enc sum: {:?}", Z.sum_with_new_min(new_min).unwrap().decrypt_decode(&sk).unwrap());
+    */
     
-    /*
 
     let input = VectorLWE::encode_encrypt(&sk, &test_datas[0], &enc).unwrap();
     // println!("{}", 2_i32.pow((test_datas[0].len() as i32).log2().ceil) as usize - test_datas[0].len());
@@ -146,6 +147,6 @@ fn main(){
 
     // println!("encrypyted mu: {:?}", &mus);
     // println!("encrypyted sig: {:?}", &sigs);
-    */
+    
 
 }

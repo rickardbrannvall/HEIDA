@@ -344,7 +344,7 @@ impl Sum for Vec<VectorLWE>{
         for d in (ListVecLWE_to_VecLWE(self.clone()).decrypt_decode(sk).unwrap()).iter(){
             sum += d;
         }
-        println!("1 sum: {}", sum);
+        // println!("1 sum: {}", sum);
 
         let res = self.clone().sum_padd(padding_add_count);
 
@@ -352,10 +352,10 @@ impl Sum for Vec<VectorLWE>{
         for d in (ListVecLWE_to_VecLWE(res.clone()).decrypt_decode(sk).unwrap()).iter(){
             sum += d;
         }
-        println!("2 sum: {}", sum);
+        // println!("2 sum: {}", sum);
 
         // res[0].pp();
-        println!("len: {}", &res.len());
+        // println!("len: {}", &res.len());
 
         let res = res.clone().sum_min(sk);
 
@@ -363,7 +363,7 @@ impl Sum for Vec<VectorLWE>{
         for d in (ListVecLWE_to_VecLWE(res.clone()).decrypt_decode(sk).unwrap()).iter(){
             sum += d;
         }
-        println!("3 sum: {}", sum);
+        // println!("3 sum: {}\n", sum);
         // res[0].pp();
         // println!("len: {}", &res.len());
 
@@ -400,29 +400,29 @@ impl SumMin for Vec<VectorLWE> {
     fn sum_min(&self, sk: &LWESecretKey) -> Self{
         let x = ListVecLWE_to_VecLWE(self.clone());
 
-        println!("{:?}", &x.encoders);
-        // let y = sum_ct_VectorLWE(x, 0., sk);
-        println!("{:?}", &x.decrypt_decode(&sk).unwrap());
+        // println!("{:?}", &x.encoders);
+        // // let y = sum_ct_VectorLWE(x, 0., sk);
+        // println!("{:?}", &x.decrypt_decode(&sk).unwrap());
 
         let minimum = x.encoders.clone().into_iter().min_by(|a, b| a.o.partial_cmp(&b.o).unwrap()).unwrap().o;
-        println!("min: {}", minimum);
+        // println!("min: {}", minimum);
 
         let delta = x.encoders[0].delta;
-        println!("in, delta: {}", delta);
+        // println!("in, delta: {}", delta);
 
         let prec: i32 = (x.encoders.clone().into_iter().map(|s| (s.nb_bit_precision as f64)/(x.nb_ciphertexts as f64)).sum::<f64>() as f64).round() as i32;
-        println!("in, prec: {}", prec);
+        // println!("in, prec: {}", prec);
 
         let range = delta * (f64::powi(2., prec) - 1.)/ (f64::powi(2., prec));
-        println!("in, range: {}", range);
+        // println!("in, range: {}", range);
 
 
         let center: f64  = x.encoders.clone().into_iter().map(|s| (2.*s.o + range)/2.).sum();
-        println!("in, center: {}", center);
+        // println!("in, center: {}", center);
 
 
         let potential_min = center - range/2.;
-        println!("pot_min: {}", potential_min);
+        // println!("pot_min: {}", potential_min);
 
         let new_min = f64::min(minimum, potential_min);
 
@@ -600,7 +600,11 @@ pub struct Model{
 #[derive(Debug)]
 pub struct Net{
     Bit_precision: usize,
-    Encoder: Encoder,
+    Encoder_0: Encoder,
+    Encoder_1: Encoder,
+    Encoder_2: Encoder,
+    // Encoder_mu: Encoder,
+    Encoder_sig: Encoder,
     sk: LWESecretKey,
     bsk: LWEBSK,
     ksk: LWEKSK,
@@ -633,7 +637,14 @@ impl Net{
         let net = Net{
             Bit_precision: prec,
             // Encoder: Encoder::new(-3., 11., prec, prec+2+1).unwrap(),
-            Encoder: Encoder::new(-3., 10.5, prec, prec+3+1).unwrap(),
+            // Encoder_0: Encoder::new(5.0*-0.87, 5.5, prec, prec+2+1).unwrap(),
+            // Encoder_1: Encoder::new(5.0*-2.14, 5.5, prec, prec+2+1).unwrap(),
+            // Encoder_2: Encoder::new(-0.5*6., 5.5, prec, prec+3+1).unwrap(),
+            Encoder_0: Encoder::new(-0.3, 5.1, prec, prec+3+1).unwrap(),
+            Encoder_1: Encoder::new(-0.3, 5.1, prec, prec+3+1).unwrap(),
+            Encoder_2: Encoder::new(-0.3, 5.1, prec, prec+3+1).unwrap(),
+            // Encoder_mu: Encoder::new(5., 5.0, prec, prec+3+1).unwrap(),
+            Encoder_sig: Encoder::new(-0.1, 3.1, prec, 0).unwrap(),
             sk: sk,
             bsk: bsk,
             ksk: ksk,
@@ -664,7 +675,7 @@ impl Net{
 
         // input.pp();
         println!("Layer 0!\n");
-        let scale_0 = 1.68;
+        let scale_0 = 0.687;
         for (i, weights) in self.Model.Layer_0.weights.iter().enumerate(){
             // println!("{}", weights.len());
             // println!("{}", self.Model.Layer_0.weights.len());
@@ -690,38 +701,40 @@ impl Net{
             // }
             ct_tmp = ct_tmp.check_vars();
             // println!("input * weights = {:?}", ct_tmp.decrypt_decode(&self.sk).unwrap());
-            // let mut sum = 0.;
-            // for d in (ct_tmp.decrypt_decode(&self.sk).unwrap()).iter(){
-            //     sum += d;
-            // }
+            let mut sum = 0.;
+            for d in (ct_tmp.decrypt_decode(&self.sk).unwrap()).iter(){
+                sum += d;
+            }
             // println!("sum: {}\n", sum);
             // let minVar = &ct_tmp.variances.clone().into_iter().min_by(|a, b| a.partial_cmp(b).unwrap());
             // println!("{}", minVar.unwrap().log2());
             
-            // println!("{}", i);
+            println!("{}", i);
             // if i == 1 {
-            //     let mut sum = 0.;
-            //     for d in (ct_tmp.decrypt_decode(&self.sk).unwrap()).iter(){
-            //         sum += d;
-            //     }
+                let mut sum = 0.;
+                for d in (ct_tmp.decrypt_decode(&self.sk).unwrap()).iter(){
+                    sum += d;
+                }
                 
-            //     println!("enc sum ( input * weights ) = {:?}", ct_tmp.clone().sum().decrypt_decode(&self.sk).unwrap());
+                println!("enc sum ( input * weights ) = {:?}", ct_tmp.clone().sum(&self.sk).decrypt_decode(&self.sk).unwrap());
             // }
 
             let _ = ct_tmp.clone().sum(&self.sk);
 
             ct_tmp = ct_tmp.append(self.zero.clone().unwrap().mul_constant_with_padding(&vec![0.], scale_0, self.Bit_precision).unwrap(), 32-19);
             // println!("input * weights = {:?}", ct_tmp.decrypt_decode(&self.sk).unwrap());
-            // let mut sum = 0.;
-            // for d in (ct_tmp.decrypt_decode(&self.sk).unwrap()).iter(){
-            //     sum += d;
-            // }
+            let mut sum = 0.;
+            for d in (ct_tmp.decrypt_decode(&self.sk).unwrap()).iter(){
+                sum += d;
+            }
             // println!("plain sum: {}, sigmoid= {}", sum, sigmoid_scaled(sum, 10.));
+            println!("plain sum: {}, max_relu= {}", sum, max_relu(sum, 5.));
             // println!("{}", ct_tmp.nb_ciphertexts);
             // ct_tmp.pp();
             ct_tmp = ct_tmp.clone().sum(&self.sk);
 
             // println!("enc sum ( input * weights ) = {:?}, sigmoid= {}", ct_tmp.decrypt_decode(&self.sk).unwrap(), sigmoid_scaled(ct_tmp.decrypt_decode(&self.sk).unwrap()[0], 10.));
+            println!("enc sum ( input * weights ) = {:?}, max_relu= {}", ct_tmp.decrypt_decode(&self.sk).unwrap(), max_relu(ct_tmp.decrypt_decode(&self.sk).unwrap()[0], 5.));
             // if i == 3{
             //     let mut sum = 0.;
             //     for d in (ct_tmp.decrypt_decode(&self.sk).unwrap()).iter(){
@@ -731,17 +744,16 @@ impl Net{
             //     println!("delta: {:?}", ct_tmp.encoders[0]);
             // }
 
-            println!("delta: {}", ct_tmp.encoders[0].delta);
+            // println!("delta: {}", ct_tmp.encoders[0].delta);
 
             // println!("{}", ct_tmp.nb_ciphertexts);
             // ct_tmp.pp();
             //add bias
-
-            let ct_tmp2 = ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| sigmoid_scaled(x, 10.), &self.Encoder, 0).unwrap();
-            // let ct_tmp2 = ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| max_relu(x, 20.), &self.Encoder, 0).unwrap();
+            // let ct_tmp2 = ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| sigmoid_scaled(x, 10.), &self.Encoder, 0).unwrap();
+            let ct_tmp2 = ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| max_relu(x, 5.), &self.Encoder_0, 0).unwrap();
             // let ct_tmp2 = ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| relu(x), &self.Encoder, 0).unwrap();
-            println!("relu ( enc sum ( input * weights ) ) = {:?}", ct_tmp2.decrypt_decode(&self.sk).unwrap());
-            println!("delta: {}\n", ct_tmp2.encoders[0].delta);
+            println!("max_relu ( enc sum ( input * weights ) ) = {:?}\n\n", ct_tmp2.decrypt_decode(&self.sk).unwrap());
+            // println!("delta: {}\n", ct_tmp2.encoders[0].delta);
 
             // ct_tmp2.pp();
             output_0.copy_in_nth_nth_inplace(i, &ct_tmp2, 0).unwrap();
@@ -750,76 +762,116 @@ impl Net{
             
         }
 
-        // ///output_1.pp();
-        // println!("Layer 1!\n");
-        // for (i, weights) in self.Model.Layer_1.weights.iter().enumerate(){
-        //     // break;
-        //     // output_0.pp();
-        //     let mut ct_tmp = output_0.mul_constant_with_padding(weights, 1.03, self.Bit_precision).unwrap();
-        //     // println!("{}", ct_tmp.nb_ciphertexts);
-        //     // ct_tmp.pp();
-        //     // ct_tmp = sum_N_VectorLWE(&ct_tmp);
+        ///output_1.pp();
+        println!("Layer 1!\n");
+        for (i, weights) in self.Model.Layer_1.weights.iter().enumerate(){
+            // break;
+            // output_0.pp();
+            let mut ct_tmp = output_0.mul_constant_with_padding(weights, 1.03, self.Bit_precision).unwrap();
+            // println!("{}", ct_tmp.nb_ciphertexts);
+            // ct_tmp.pp();
+            // ct_tmp = sum_N_VectorLWE(&ct_tmp);
 
-        //     // ct_tmp.add_constant_static_encoder_inplace(&vec![0.0; ct_tmp.nb_ciphertexts]);
-        //     // ct_tmp.pp();
-        //     ct_tmp = ct_tmp.check_vars();
-        //     // ct_tmp.pp();
+            // ct_tmp.add_constant_static_encoder_inplace(&vec![0.0; ct_tmp.nb_ciphertexts]);
+            // ct_tmp.pp();
 
-        //     ct_tmp = ct_tmp.clone().sum();
-        //     // println!("sum ( input * weights ) = {:?}", ct_tmp.decrypt_decode(&self.sk).unwrap());
-        //     // println!("sum ( input * weights ) = {:?}", ct_tmp.encoders[0]);
-        //     // println!("{}", ct_tmp.nb_ciphertexts);
-        //     // ct_tmp.pp();
-        //     //add bias
-        //     let ct_tmp2 = ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| relu(x), &self.Encoder, 0).unwrap();
-        //     // println!("relu ( sum ( input * weights ) ) = {:?}", ct_tmp2.decrypt_decode(&self.sk).unwrap());
-        //     // println!("relu ( sum ( input * weights ) ) = {:?}\n", ct_tmp2.encoders[0]);
-        //     output_1.copy_in_nth_nth_inplace(i, &ct_tmp2, 0).unwrap();
-        //     // output_1.copy_in_nth_nth_inplace(i, &(ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| relu(x), &self.Encoder, 0).unwrap()), 0).unwrap();
-        //     // break
-        // }
+            ct_tmp = ct_tmp.check_vars();
+            
+            // ct_tmp.pp();
 
-        // ///output_1.pp();
-        // println!("Layer 2!\n");
-        // for (i, weights) in self.Model.Layer_2.weights.iter().enumerate(){
-        //     let mut ct_tmp = output_1.mul_constant_with_padding(weights, 1.6, self.Bit_precision).unwrap();
-        //     //ct_tmp.pp();
-        //     // ct_tmp = sum_N_VectorLWE(&ct_tmp);
-        //     ct_tmp = ct_tmp.check_vars();
+            let mut sum = 0.;
+            for d in (ct_tmp.decrypt_decode(&self.sk).unwrap()).iter(){
+                sum += d;
+            }
+            // println!("plain sum: {}, sigmoid= {}", sum, sigmoid_scaled(sum, 10.));
+            println!("plain sum: {}, max_relu= {}", sum, max_relu(sum, 5.));
 
-        //     ct_tmp = ct_tmp.clone().sum();
-        //     //ct_tmp.pp();
-        //     //add bias
-        //     let ct_tmp2 = ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| relu(x), &self.Encoder, 0).unwrap();
-        //     output_2.copy_in_nth_nth_inplace(i, &ct_tmp2, 0).unwrap();
-        //     // output_2.copy_in_nth_nth_inplace(i, &(ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| relu(x), &self.Encoder, 0).unwrap()), 0).unwrap();
-        // }
+            ct_tmp = ct_tmp.clone().sum(&self.sk);
+            println!("enc sum ( input * weights ) = {:?}, max_relu= {}", ct_tmp.decrypt_decode(&self.sk).unwrap(), max_relu(ct_tmp.decrypt_decode(&self.sk).unwrap()[0], 5.));
+            // println!("sum ( input * weights ) = {:?}", ct_tmp.decrypt_decode(&self.sk).unwrap());
+            // println!("sum ( input * weights ) = {:?}", ct_tmp.encoders[0]);
+            // println!("{}", ct_tmp.nb_ciphertexts);
+            // ct_tmp.pp();
+            //add bias
+            // let ct_tmp2 = ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| sigmoid_scaled(x, 10.), &self.Encoder, 0).unwrap();
+            // let ct_tmp2 = ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| relu(x), &self.Encoder, 0).unwrap();
+            let ct_tmp2 = ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| max_relu(x, 5.), &self.Encoder_1, 0).unwrap();
+            println!("max_relu ( enc sum ( input * weights ) ) = {:?}\n\n", ct_tmp2.decrypt_decode(&self.sk).unwrap());
+            // println!("relu ( sum ( input * weights ) ) = {:?}", ct_tmp2.decrypt_decode(&self.sk).unwrap());
+            // println!("relu ( sum ( input * weights ) ) = {:?}\n", ct_tmp2.encoders[0]);
+            output_1.copy_in_nth_nth_inplace(i, &ct_tmp2, 0).unwrap();
+            // output_1.copy_in_nth_nth_inplace(i, &(ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| relu(x), &self.Encoder, 0).unwrap()), 0).unwrap();
+            // break
+        }
 
-        // println!("Layer mu!\n");
-        // for (i, weights) in self.Model.Layer_mu.weights.iter().enumerate(){
-        //     let mut ct_tmp = output_2.mul_constant_with_padding(weights, 1.5, self.Bit_precision).unwrap();
-        //     // ct_tmp = sum_N_VectorLWE(&ct_tmp);
-        //     ct_tmp = ct_tmp.check_vars();
+        ///output_1.pp();
+        println!("Layer 2!\n");
+        for (i, weights) in self.Model.Layer_2.weights.iter().enumerate(){
+            let mut ct_tmp = output_1.mul_constant_with_padding(weights, 1.27, self.Bit_precision).unwrap();
+            //ct_tmp.pp();
+            // ct_tmp = sum_N_VectorLWE(&ct_tmp);
+            ct_tmp = ct_tmp.check_vars();
 
-        //     ct_tmp = ct_tmp.clone().sum();
-        //     //ct_tmp.pp();
-        //     //add bias
-        //     output_mu.copy_in_nth_nth_inplace(i, &ct_tmp, 0).unwrap();
-        // }
+            let mut sum = 0.;
+            for d in (ct_tmp.decrypt_decode(&self.sk).unwrap()).iter(){
+                sum += d;
+            }
+            // println!("plain sum: {}, sigmoid= {}", sum, sigmoid_scaled(sum, 10.));
+            println!("plain sum: {}, max_relu= {}", sum, max_relu(sum, 5.));
+            ct_tmp = ct_tmp.clone().sum(&self.sk);
+            println!("enc sum ( input * weights ) = {:?}, max_relu= {}", ct_tmp.decrypt_decode(&self.sk).unwrap(), max_relu(ct_tmp.decrypt_decode(&self.sk).unwrap()[0], 5.));
+            //ct_tmp.pp();
+            //add bias
+            // let ct_tmp2 = ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| sigmoid_scaled(x, 10.), &self.Encoder, 0).unwrap();
+            let ct_tmp2 = ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| max_relu(x, 5.), &self.Encoder_2, 0).unwrap();
+            println!("max_relu ( enc sum ( input * weights ) ) = {:?}\n\n", ct_tmp2.decrypt_decode(&self.sk).unwrap());
+            // let ct_tmp2 = ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| relu(x), &self.Encoder, 0).unwrap();
+            output_2.copy_in_nth_nth_inplace(i, &ct_tmp2, 0).unwrap();
+            // output_2.copy_in_nth_nth_inplace(i, &(ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| relu(x), &self.Encoder, 0).unwrap()), 0).unwrap();
+        }
 
-        // println!("Layer sig!\n");
-        // for (i, weights) in self.Model.Layer_sig.weights.iter().enumerate(){
-        //     let mut ct_tmp = output_2.mul_constant_with_padding(weights, 1.5, self.Bit_precision).unwrap();
-        //     // ct_tmp = sum_N_VectorLWE(&ct_tmp);
-        //     ct_tmp = ct_tmp.check_vars();
+        println!("Layer mu!\n");
+        for (i, weights) in self.Model.Layer_mu.weights.iter().enumerate(){
+            let mut ct_tmp = output_2.mul_constant_with_padding(weights, 0.78, self.Bit_precision).unwrap();
+            // ct_tmp = sum_N_VectorLWE(&ct_tmp);
+            ct_tmp = ct_tmp.check_vars();
 
-        //     ct_tmp = ct_tmp.clone().sum();
-        //     //ct_tmp.pp();
-        //     //add bias
-        //     let ct_tmp2 = ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| relu(x), &self.Encoder, 0).unwrap();
-        //     output_sig.copy_in_nth_nth_inplace(i, &ct_tmp2, 0).unwrap();
-        //     // output_sig.copy_in_nth_nth_inplace(i, &(ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| elu_plus_one(x), &self.Encoder, 0).unwrap()), 0).unwrap();
-        // }
+            let mut sum = 0.;
+            for d in (ct_tmp.decrypt_decode(&self.sk).unwrap()).iter(){
+                sum += d;
+            }
+            // println!("plain sum: {}, sigmoid= {}", sum, sigmoid_scaled(sum, 10.));
+            println!("plain sum: {}, max_relu= {}", sum, max_relu(sum, 5.));
+            ct_tmp = ct_tmp.clone().sum(&self.sk);
+            println!("enc sum ( input * weights ) = {:?}, max_relu= {}\n", ct_tmp.decrypt_decode(&self.sk).unwrap(), max_relu(ct_tmp.decrypt_decode(&self.sk).unwrap()[0], 5.));
+            //ct_tmp.pp();
+            //add bias
+            output_mu.copy_in_nth_nth_inplace(i, &ct_tmp, 0).unwrap();
+        }
+
+        println!("Layer sig!\n");
+        for (i, weights) in self.Model.Layer_sig.weights.iter().enumerate(){
+            let mut ct_tmp = output_2.mul_constant_with_padding(weights, 0.35, self.Bit_precision).unwrap();
+            // ct_tmp = sum_N_VectorLWE(&ct_tmp);
+            ct_tmp = ct_tmp.check_vars();
+
+            let mut sum = 0.;
+            for d in (ct_tmp.decrypt_decode(&self.sk).unwrap()).iter(){
+                sum += d;
+            }
+            // println!("plain sum: {}, sigmoid= {}", sum, sigmoid_scaled(sum, 10.));
+            println!("plain sum: {}, max_relu= {}", sum, max_relu(sum, 5.));
+            ct_tmp = ct_tmp.clone().sum(&self.sk);
+            println!("enc sum ( input * weights ) = {:?}, max_relu= {}", ct_tmp.decrypt_decode(&self.sk).unwrap(), max_relu(ct_tmp.decrypt_decode(&self.sk).unwrap()[0], 5.));
+            //ct_tmp.pp();
+            //add bias
+            // let ct_tmp2 = ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| sigmoid_scaled(x, 10.), &self.Encoder, 0).unwrap();
+            // let ct_tmp2 = ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| relu(x), &self.Encoder, 0).unwrap();
+            let ct_tmp2 = ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| elu_plus_one(x), &self.Encoder_sig, 0).unwrap();
+            println!("max_relu ( enc sum ( input * weights ) ) = {:?}\n\n", ct_tmp2.decrypt_decode(&self.sk).unwrap());
+            output_sig.copy_in_nth_nth_inplace(i, &ct_tmp2, 0).unwrap();
+            // output_sig.copy_in_nth_nth_inplace(i, &(ct_tmp.bootstrap_nth_with_function(&self.bsk, |x| elu_plus_one(x), &self.Encoder, 0).unwrap()), 0).unwrap();
+        }
         
         return (output_mu, output_sig);
     }
@@ -854,7 +906,7 @@ impl Net{
 
             let ct_tmp = &sum_N_LWE(&layer_tmp)[0];
             // *out = ct_tmp.bootstrap_with_function(&bsk, |x| func(x), &self.Encoder).unwrap();
-            *out = ct_tmp.bootstrap_with_function(&self.bsk, |x| func(x), &self.Encoder).unwrap();
+            *out = ct_tmp.bootstrap_with_function(&self.bsk, |x| func(x), &self.Encoder_0).unwrap();
         });
 
         return output;

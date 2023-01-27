@@ -14,9 +14,6 @@ fn main() {
     // print_type_of(&sk);
     // println!("{:?}", sk.type_of());
 
-    // let 
-
-
 
     // // println!("Creating Bootstrapping key!");
     // // let bsk = new_bsk(&sk, None);

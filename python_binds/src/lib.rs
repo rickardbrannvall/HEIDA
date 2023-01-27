@@ -125,8 +125,14 @@ fn decrypt_VecLWE_str(str_x: String, id: String) -> PyResult<Vec<f64>> {
 }
 
 #[derive(Serialize, Deserialize)]
+#[pyclass]
 struct LWE_list{
     pub lwe_list: Vec<VectorLWE>,
+}
+
+#[pyclass]
+struct py_bsk{
+    bsk: LWEBSK,
 }
 
 #[pyfunction]

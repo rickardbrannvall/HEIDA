@@ -24,16 +24,14 @@ fn encrypt_cardio_data(small: &Vec<f64>, large: &Vec<f64>, sk: &LWESecretKey) ->
     let enc_small = Encoder::new(0., 15., 4, 1).unwrap();
     let enc_large = Encoder::new(0., 255., 4, 1).unwrap();
 
-    let small_enc = VectorLWE::encode_encrypt(&sk, small, &enc_small).unwrap(); 
-    // small_enc.pp();    
+    let small_enc = VectorLWE::encode_encrypt(&sk, small, &enc_small).unwrap();
     
     let large_enc = VectorLWE::encode_encrypt(&sk, large, &enc_large).unwrap();
-    // large_enc.pp();    
 
     return (small_enc, large_enc, enc_small, enc_large);
 }
 
-fn old_cardio(small_enc: &VectorLWE, large_enc: &VectorLWE, enc_small: &Encoder, sk: &LWESecretKey, bsk: &LWEBSK, ksk: &LWEKSK) -> (){
+fn sequential_cardio(small_enc: &VectorLWE, large_enc: &VectorLWE, enc_small: &Encoder, sk: &LWESecretKey, bsk: &LWEBSK, ksk: &LWEKSK) -> (){
 
     let mut y0 = VectorLWE::zero(1024, 8).unwrap();
     y0.copy_in_nth_nth_inplace(0, &small_enc, 0).unwrap(); // dummy
@@ -46,12 +44,10 @@ fn old_cardio(small_enc: &VectorLWE, large_enc: &VectorLWE, enc_small: &Encoder,
     y0.copy_in_nth_nth_inplace(7, &small_enc, 0).unwrap(); // dummy
     
     // println!("scores {:?}", y0.decrypt_decode(&sk).unwrap());
-    // y0.pp();
         
     
     // *** age check ***
     let mut age0 = large_enc.extract_nth(0).unwrap();
-    //let mut mod0 = small_enc.extract_nth(0).unwrap();
     let mut mod0 = large_enc.extract_nth(5).unwrap();
     let diff: Vec<i32> = vec![10];
     mod0.mul_constant_static_encoder_inplace(&diff).unwrap();
@@ -59,7 +55,6 @@ fn old_cardio(small_enc: &VectorLWE, large_enc: &VectorLWE, enc_small: &Encoder,
     
     age0.add_with_new_min_inplace(&mod0, &vec![0.0]).unwrap();
     // println!("age_eff {:?}", age0.decrypt_decode(&sk).unwrap());
-    // age0.pp(); 
     
     let fun = |val:f64| {
         if val>60.0 {
@@ -80,7 +75,6 @@ fn old_cardio(small_enc: &VectorLWE, large_enc: &VectorLWE, enc_small: &Encoder,
     let mut HDL_chol0 = large_enc.extract_nth(1).unwrap();
 
     // println!("HDL_chol0 {:?}", HDL_chol0.decrypt_decode(&sk).unwrap());
-    // HDL_chol0.pp(); 
     
     let fun = |val:f64| {
         if val<40.0 {
@@ -104,7 +98,6 @@ fn old_cardio(small_enc: &VectorLWE, large_enc: &VectorLWE, enc_small: &Encoder,
     height0.add_with_new_min_inplace(&weight0, &vec![0.0]).unwrap();
 
     // println!("height_ind {:?}", height0.decrypt_decode(&sk).unwrap());
-    // height0.pp(); 
     
     let fun = |val:f64| {
         if val<90.0 {
@@ -125,7 +118,6 @@ fn old_cardio(small_enc: &VectorLWE, large_enc: &VectorLWE, enc_small: &Encoder,
     let mut exercise0 = large_enc.extract_nth(4).unwrap();
 
     // println!("exercise0 {:?}", exercise0.decrypt_decode(&sk).unwrap());
-    // exercise0.pp(); 
     
     let fun = |val:f64| {
         if val<30.0 {
@@ -169,17 +161,14 @@ fn old_cardio(small_enc: &VectorLWE, large_enc: &VectorLWE, enc_small: &Encoder,
     
     
     // *** display scores
-    
     // println!("scores {:?} ", y0.decrypt_decode(&sk).unwrap());
-    // y0.pp();    
 
     let score0 = y0.sum_with_new_min(0.).unwrap();
     
     println!("cardiac score: {:?} (sequential version)", score0.decrypt_decode(&sk).unwrap());
-    // score0.pp();
 }
 
-fn new_cardio(small_enc_new: &VectorLWE, large_enc_new: &VectorLWE, enc_small: &Encoder, sk: &LWESecretKey, bsk: &LWEBSK) -> (){
+fn parallel_cardio(small_enc_new: &VectorLWE, large_enc_new: &VectorLWE, enc_small: &Encoder, sk: &LWESecretKey, bsk: &LWEBSK) -> (){
 
     // ## ---- Pre-proceessing before Bootstrapping ---- ## 
 
@@ -222,14 +211,12 @@ fn new_cardio(small_enc_new: &VectorLWE, large_enc_new: &VectorLWE, enc_small: &
     alco.add_constant_static_encoder_inplace(&vec![1.0]).unwrap();
     disc.opposite_nth_inplace(0).unwrap();
     alco.add_with_new_min_inplace(&disc, &vec![0.0]).unwrap();
-    // println!("effective alco: {:?}", alco.decrypt_decode(&sk).unwrap());
 
     boot_list.push(alco);
     func_list.push((step_function, 3.0, 1));
 
     // ## -- bootstrapping -- ##
     boot_list.par_iter_mut().zip(func_list.par_iter()).for_each(| (var, (func, val, opt)) |{
-        // println!("{:?} {:?}", &val, &opt);
         *var = var.bootstrap_nth_with_function(&bsk, |x| func(x, *val, *opt), &enc_small, 0).unwrap();
     });
 
@@ -244,10 +231,6 @@ fn new_cardio(small_enc_new: &VectorLWE, large_enc_new: &VectorLWE, enc_small: &
 
     let score = scores.sum_with_new_min(0.).unwrap();
     println!("cardiac score: {:?} (parallel version)", score.decrypt_decode(&sk).unwrap());
-
-    // y = [Boot (large_enc_new[0]-large_enc_new[5]), small_enc_new[1], small_enc_new[2], small_enc_new[3], Boot large_enc_new[1], Boot (large_enc_new[2]-large_enc_new[3]), Boot large_enc_new[4], Boot (small_enc_new[4]-small_enc_new[0])]
-    // OR y = [Boot (large_enc_new[0]-large_enc_new[5]), Boot large_enc_new[1], Boot (large_enc_new[2]-large_enc_new[3]), Boot large_enc_new[4], Boot (small_enc_new[4]-small_enc_new[0]), small_enc_new[1], small_enc_new[2], small_enc_new[3]]
-    // y_s = y.sum();
 
 }
 
@@ -265,30 +248,27 @@ fn main() {
     
     println!("Loading Bootstrapping key!\n");
     let bsk = load_bsk(id);
-    // println!("{:?}", bsk.polynomial_size);
 
     println!("Loading Keyswitching key!\n");
     let ksk = load_ksk(id);
-    // println!("{:?}", ksk.dimension_after);
 
     /* 
-        Older version
+        Sequential version
     */
     let now = Instant::now();
 
-    // for _ in 0..10{
-        old_cardio(&small_enc, &large_enc, &enc_small, &sk, &bsk, &ksk);
-    // }
+    sequential_cardio_cardio(&small_enc, &large_enc, &enc_small, &sk, &bsk, &ksk);
+
     println!("elapsed in: {} seconds\n", (now.elapsed().as_millis() as f32)/1000.0);
 
 
     /* 
-        Updated version ~4x faster
+        Parallel version ~4x faster
     */
     let now = Instant::now();
-    // for _ in 0..10{
-    new_cardio(&small_enc_new, &large_enc_new, &enc_small, &sk, &bsk);
-    // }
+
+    parallel_cardio(&small_enc_new, &large_enc_new, &enc_small, &sk, &bsk);
+
     println!("elapsed in: {} seconds\n", (now.elapsed().as_millis() as f32)/1000.0);
 
 

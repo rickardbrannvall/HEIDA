@@ -1,0 +1,9 @@
+# assumes docker container jupyter/datascience-notebook
+apt update && apt install libfftw3-dev libfftw3-doc -y
+apt update && apt install libzmq3-dev cmake g++ -y
+curl --tlsv1.2 https://sh.rustup.rs -sSf | sh -s -- -y
+ln -s ~/.cargo/bin/cargo /usr/local/bin/cargo
+#cargo install evcxr_jupyter
+#ln -s ~/.cargo/bin/evcxr_jupyter /usr/local/bin/evcxr_jupyter
+#evcxr_jupyter --install
+apt install htop

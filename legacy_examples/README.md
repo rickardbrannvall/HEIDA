@@ -5,3 +5,10 @@
 
 alternatively you can setup manually in ubuntu with at least jupyterlab installed
 (although there may be further requirements)
+
+RUSTFLAGS="-C target-cpu=native" cargo run --release
+RUSTFLAGS="-C target-cpu=native" cargo build --release
+
+cargo build
+cargo build —release
+

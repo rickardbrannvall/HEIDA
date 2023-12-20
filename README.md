@@ -10,5 +10,5 @@ Benchmarking of operations happens in Python notebooks using the TFHE Concrete a
 Alternatively you can setup manually in ubuntu with at least jupyterlab installed (although there may be further requirements).
 
 Directories:
-- legacy_examples -- these are examples from a previous iteration of this repo built on TFHE Concrete in Rust
-- python_examples -- these are the more current examples only in Python for both TenSEal CKKS and TFHE Concrete
+- legacy_examples - examples from a previous iteration of this repo built on TFHE Concrete in Rust
+- python_examples - more current examples only in Python for both TenSEal CKKS and TFHE Concrete

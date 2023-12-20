@@ -1,8 +1,6 @@
-# FHEFL
+# FHEFL - FHE enchanced federated learning
 
-This repository holds the tex files used for compiling an article submitted to CHASE 2023.
-
-It also contains the Python and Rust code used for the numerical investigations.  
+This repository contains the Python and Rust code used for the numerical investigations.  
 
 ## CKKS operations
 
